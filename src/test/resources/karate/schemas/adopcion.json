@@ -1,0 +1,80 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "type": "object",
+    "required": ["id", "solicitud", "fecha_adopcion", "mascota_nombre"],
+    "properties": {
+        "id": {
+            "type": "integer"
+        },
+        "solicitud": {
+            "type": "integer"
+        },
+        "mascota_nombre": {
+            "type": "string"
+        },
+        "mascota_especie": {
+            "type": "string",
+            "enum": ["PERRO", "GATO", "CONEJO", "HAMSTER"]
+        },
+        "mascota_raza": {
+            "type": ["string", "null"]
+        },
+        "mascota_edad_anios": {
+            "type": ["integer", "null"]
+        },
+        "mascota_edad_unidad": {
+            "type": ["string", "null"]
+        },
+        "mascota_sexo": {
+            "type": ["string", "null"]
+        },
+        "mascota_tamano": {
+            "type": ["string", "null"]
+        },
+        "mascota_descripcion": {
+            "type": ["string", "null"]
+        },
+        "mascota_foto_url": {
+            "type": ["string", "null"]
+        },
+        "familia_nombre": {
+            "type": "string"
+        },
+        "familia_email": {
+            "type": "string",
+            "format": "email"
+        },
+        "familia_cedula": {
+            "type": ["string", "null"]
+        },
+        "familia_telefono": {
+            "type": ["string", "null"]
+        },
+        "familia_ciudad": {
+            "type": "string"
+        },
+        "familia_departamento": {
+            "type": "string"
+        },
+        "familia_foto_perfil_url": {
+            "type": ["string", "null"]
+        },
+        "solicitud_mensaje": {
+            "type": "string"
+        },
+        "solicitud_notas_admin": {
+            "type": ["string", "null"]
+        },
+        "solicitud_fecha": {
+            "type": "string",
+            "format": "date-time"
+        },
+        "fecha_adopcion": {
+            "type": "string",
+            "format": "date-time"
+        },
+        "notas": {
+            "type": ["string", "null"]
+        }
+    }
+}

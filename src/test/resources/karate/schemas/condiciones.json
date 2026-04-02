@@ -1,0 +1,57 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "type": "object",
+    "required": ["id", "tipo_vivienda", "propiedad_vivienda", "numero_personas", "acuerdo_responsabilidad"],
+    "properties": {
+        "id": {
+            "type": "integer"
+        },
+        "tipo_vivienda": {
+            "type": "string",
+            "enum": ["CASA", "APARTAMENTO", "FINCA", "OTRO"]
+        },
+        "propiedad_vivienda": {
+            "type": "string",
+            "enum": ["PROPIA", "ALQUILADA"]
+        },
+        "tiene_patio": {
+            "type": "boolean"
+        },
+        "numero_personas": {
+            "type": "integer"
+        },
+        "tiene_ninos": {
+            "type": "boolean"
+        },
+        "tamano_hogar": {
+            "type": ["string", "null"],
+            "enum": ["PEQUENO", "MEDIANO", "GRANDE"]
+        },
+        "tiene_mascotas_actualmente": {
+            "type": "boolean"
+        },
+        "otras_mascotas": {
+            "type": ["array", "null"]
+        },
+        "tiempo_solo_horas": {
+            "type": ["integer", "null"]
+        },
+        "ingresos_estimados": {
+            "type": ["string", "null"],
+            "enum": ["MENOS_1SMLV", "1_2SMLV", "2_4SMLV", "MAS_4SMLV"]
+        },
+        "experiencia_mascotas": {
+            "type": ["string", "null"]
+        },
+        "motivacion": {
+            "type": ["string", "null"]
+        },
+        "acuerdo_responsabilidad": {
+            "type": "boolean"
+        },
+        "fecha_registro": {
+            "type": "string",
+            "format": "date-time"
+        }
+    }
+}

@@ -1,0 +1,118 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "type": "object",
+    "required": ["id", "mascota", "familia", "estado", "mensaje", "fecha_solicitud"],
+    "properties": {
+        "id": {
+            "type": "integer"
+        },
+        "mascota": {
+            "type": "integer"
+        },
+        "mascota_nombre": {
+            "type": "string"
+        },
+        "mascota_especie": {
+            "type": "string",
+            "enum": ["PERRO", "GATO", "CONEJO", "HAMSTER"]
+        },
+        "mascota_raza": {
+            "type": ["string", "null"]
+        },
+        "mascota_edad_anios": {
+            "type": ["integer", "null"]
+        },
+        "mascota_edad_unidad": {
+            "type": ["string", "null"],
+            "enum": ["ANIOS", "MESES"]
+        },
+        "mascota_sexo": {
+            "type": ["string", "null"],
+            "enum": ["MACHO", "HEMBRA"]
+        },
+        "mascota_tamano": {
+            "type": ["string", "null"],
+            "enum": ["PEQUENO", "MEDIANO", "GRANDE"]
+        },
+        "mascota_nivel_energia": {
+            "type": ["string", "null"]
+        },
+        "mascota_nivel_independencia": {
+            "type": ["string", "null"]
+        },
+        "mascota_nivel_complejidad": {
+            "type": ["string", "null"]
+        },
+        "mascota_nivel_sociabilidad": {
+            "type": ["string", "null"]
+        },
+        "mascota_apta_ninos": {
+            "type": ["boolean", "null"]
+        },
+        "mascota_costo_estimado_mensual": {
+            "type": ["string", "null"]
+        },
+        "mascota_descripcion": {
+            "type": ["string", "null"]
+        },
+        "mascota_historia": {
+            "type": ["string", "null"]
+        },
+        "mascota_estado": {
+            "type": "string",
+            "enum": ["DISPONIBLE", "EN_PROCESO", "ADOPTADO", "NO_DISPONIBLE"]
+        },
+        "mascota_foto_url": {
+            "type": ["string", "null"]
+        },
+        "familia": {
+            "type": "integer"
+        },
+        "familia_nombre": {
+            "type": "string"
+        },
+        "familia_cedula": {
+            "type": ["string", "null"]
+        },
+        "familia_telefono": {
+            "type": ["string", "null"]
+        },
+        "familia_ciudad": {
+            "type": "string"
+        },
+        "familia_departamento": {
+            "type": "string"
+        },
+        "familia_direccion": {
+            "type": ["string", "null"]
+        },
+        "familia_email": {
+            "type": "string",
+            "format": "email"
+        },
+        "familia_foto_perfil_url": {
+            "type": ["string", "null"]
+        },
+        "condiciones_hogar": {
+            "type": ["object", "null"]
+        },
+        "estado": {
+            "type": "string",
+            "enum": ["PENDIENTE", "APROBADA", "RECHAZADA"]
+        },
+        "mensaje": {
+            "type": "string"
+        },
+        "notas_admin": {
+            "type": ["string", "null"]
+        },
+        "fecha_solicitud": {
+            "type": "string",
+            "format": "date-time"
+        },
+        "fecha_decision": {
+            "type": ["string", "null"],
+            "format": "date-time"
+        }
+    }
+}
