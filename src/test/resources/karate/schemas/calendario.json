@@ -1,0 +1,58 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "type": "object",
+    "required": ["id", "adopcion", "mascota_nombre", "mascota_especie", "fecha_generacion", "entradas"],
+    "properties": {
+        "id": {
+            "type": "integer"
+        },
+        "adopcion": {
+            "type": "integer"
+        },
+        "mascota_nombre": {
+            "type": "string"
+        },
+        "mascota_especie": {
+            "type": "string",
+            "enum": ["PERRO", "GATO", "CONEJO", "HAMSTER"]
+        },
+        "mascota_foto_url": {
+            "type": ["string", "null"]
+        },
+        "notas": {
+            "type": ["string", "null"]
+        },
+        "fecha_generacion": {
+            "type": "string",
+            "format": "date-time"
+        },
+        "entradas": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "required": ["id", "nombre_vacuna", "es_refuerzo", "completada"],
+                "properties": {
+                    "id": {
+                        "type": "integer"
+                    },
+                    "nombre_vacuna": {
+                        "type": "string"
+                    },
+                    "descripcion": {
+                        "type": ["string", "null"]
+                    },
+                    "fecha_sugerida": {
+                        "type": "string",
+                        "format": "date"
+                    },
+                    "es_refuerzo": {
+                        "type": "boolean"
+                    },
+                    "completada": {
+                        "type": "boolean"
+                    }
+                }
+            }
+        }
+    }
+}

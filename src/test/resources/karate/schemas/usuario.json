@@ -1,0 +1,35 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "type": "object",
+    "required": ["id", "email", "rol"],
+    "properties": {
+        "id": {
+            "type": "integer"
+        },
+        "email": {
+            "type": "string",
+            "format": "email"
+        },
+        "nombre": {
+            "type": ["string", "null"],
+            "maxLength": 150
+        },
+        "rol": {
+            "type": "string",
+            "enum": ["ADMIN", "FAMILIA"]
+        },
+        "perfil_completo": {
+            "type": "boolean"
+        },
+        "fecha_creacion": {
+            "type": "string",
+            "format": "date-time"
+        },
+        "is_active": {
+            "type": "boolean"
+        },
+        "is_staff": {
+            "type": "boolean"
+        }
+    }
+}

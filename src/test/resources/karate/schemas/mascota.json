@@ -1,0 +1,112 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "type": "object",
+    "required": ["id", "nombre", "especie", "estado"],
+    "properties": {
+        "id": {
+            "type": "integer"
+        },
+        "nombre": {
+            "type": "string",
+            "maxLength": 100
+        },
+        "especie": {
+            "type": "string",
+            "enum": ["PERRO", "GATO", "CONEJO", "HAMSTER"]
+        },
+        "raza": {
+            "type": ["string", "null"],
+            "maxLength": 100
+        },
+        "edad_anios": {
+            "type": ["integer", "null"],
+            "minimum": 0,
+            "maximum": 99
+        },
+        "edad_unidad": {
+            "type": ["string", "null"],
+            "enum": ["ANIOS", "MESES"]
+        },
+        "fecha_nacimiento": {
+            "type": ["string", "null"],
+            "format": "date"
+        },
+        "tamano": {
+            "type": ["string", "null"],
+            "enum": ["PEQUENO", "MEDIANO", "GRANDE"]
+        },
+        "peso": {
+            "type": ["number", "null"],
+            "maximum": 999.99
+        },
+        "sexo": {
+            "type": ["string", "null"],
+            "enum": ["MACHO", "HEMBRA"]
+        },
+        "descripcion": {
+            "type": ["string", "null"]
+        },
+        "estado": {
+            "type": "string",
+            "enum": ["DISPONIBLE", "EN_PROCESO", "ADOPTADO", "NO_DISPONIBLE"]
+        },
+        "foto": {
+            "type": ["string", "null"]
+        },
+        "foto_url": {
+            "type": ["string", "null"]
+        },
+        "nivel_energia": {
+            "type": ["string", "null"],
+            "enum": ["BAJO", "MEDIO", "ALTO"]
+        },
+        "nivel_independencia": {
+            "type": ["string", "null"],
+            "enum": ["BAJO", "MEDIO", "ALTO"]
+        },
+        "nivel_complejidad": {
+            "type": ["string", "null"],
+            "enum": ["BAJO", "MEDIO", "ALTO"]
+        },
+        "nivel_sociabilidad": {
+            "type": ["string", "null"],
+            "enum": ["BAJO", "MEDIO", "ALTO"]
+        },
+        "apta_ninos": {
+            "type": ["boolean", "null"]
+        },
+        "costo_estimado_mensual": {
+            "type": ["string", "null"],
+            "enum": ["MENOS_1SMLV", "1_2SMLV", "2_4SMLV", "MAS_4SMLV"]
+        },
+        "historial_vacunas": {
+            "type": ["array", "null"]
+        },
+        "carnet_vacunas": {
+            "type": ["string", "null"]
+        },
+        "carnet_vacunas_url": {
+            "type": ["string", "null"]
+        },
+        "historia_mascota": {
+            "type": ["string", "null"]
+        },
+        "info_adicional": {
+            "type": ["string", "null"]
+        },
+        "registrado_por": {
+            "type": "integer"
+        },
+        "registrado_por_email": {
+            "type": "string"
+        },
+        "fecha_ingreso": {
+            "type": "string",
+            "format": "date-time"
+        },
+        "fecha_actualizacion": {
+            "type": "string",
+            "format": "date-time"
+        }
+    }
+}

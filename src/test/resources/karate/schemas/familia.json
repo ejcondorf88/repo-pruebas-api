@@ -1,0 +1,62 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "type": "object",
+    "required": ["id", "usuario", "nombre_familia", "ciudad", "departamento"],
+    "properties": {
+        "id": {
+            "type": "integer"
+        },
+        "usuario": {
+            "type": "integer"
+        },
+        "usuario_email": {
+            "type": "string",
+            "format": "email"
+        },
+        "nombre_familia": {
+            "type": "string",
+            "maxLength": 200
+        },
+        "cedula": {
+            "type": ["string", "null"],
+            "maxLength": 20
+        },
+        "fecha_nacimiento": {
+            "type": ["string", "null"],
+            "format": "date"
+        },
+        "telefono": {
+            "type": ["string", "null"],
+            "minLength": 7
+        },
+        "ciudad": {
+            "type": "string",
+            "maxLength": 100
+        },
+        "departamento": {
+            "type": "string",
+            "maxLength": 100
+        },
+        "direccion": {
+            "type": ["string", "null"],
+            "maxLength": 300
+        },
+        "redes_sociales": {
+            "type": ["string", "null"],
+            "maxLength": 200
+        },
+        "foto_perfil": {
+            "type": ["string", "null"]
+        },
+        "foto_perfil_url": {
+            "type": ["string", "null"]
+        },
+        "condiciones_hogar": {
+            "type": ["object", "null"]
+        },
+        "fecha_registro": {
+            "type": "string",
+            "format": "date-time"
+        }
+    }
+}
