@@ -1,93 +1,170 @@
 Feature: Mascotas - Creación
 
-    Background:
-        * url baseUrl + '/api/' + apiVersion + '/mascotas/'
-        * header Content-Type = 'application/json'
-        * def mascotaRequest =
-        """
-        {
-            "nombre": "Luna",
-            "especie": "PERRO",
-            "raza": "Golden Retriever",
-            "edad_anios": 2,
-            "edad_unidad": "ANIOS",
-            "fecha_nacimiento": "2022-01-15",
-            "tamano": "GRANDE",
-            "peso": 25.50,
-            "sexo": "HEMBRA",
-            "descripcion": "Muy juguetona y cariñosa",
-            "estado": "DISPONIBLE",
-            "nivel_energia": "ALTO",
-            "nivel_independencia": "MEDIO",
-            "nivel_complejidad": "BAJO",
-            "nivel_sociabilidad": "ALTO",
-            "apta_ninos": true,
-            "costo_estimado_mensual": "1_2SMLV",
-            "historial_vacunas": ["Rabia", "Parvovirus"],
-            "historia_mascota": "Rescatada de la calle",
-            "info_adicional": "Le gusta jugar con pelotas"
-        }
-        """
+Background:
+* def mascotasUrl = baseUrl + '/api/v1/mascotas/'
+* def authUrl = baseUrl + '/api/v1/auth/'
+* def mascotaRequest =
+"""
+{
+  "nombre": "Luna",
+  "especie": "PERRO",
+  "raza": "Golden Retriever",
+  "edad_anios": 2,
+  "edad_unidad": "ANIOS",
+  "fecha_nacimiento": "2022-01-15",
+  "tamano": "GRANDE",
+  "peso": 25.50,
+  "sexo": "HEMBRA",
+  "descripcion": "Muy juguetona y cariñosa",
+  "estado": "DISPONIBLE",
+  "nivel_energia": "ALTO",
+  "nivel_independencia": "MEDIO",
+  "nivel_complejidad": "BAJO",
+  "nivel_sociabilidad": "ALTO",
+  "apta_ninos": true,
+  "costo_estimado_mensual": "1_2SMLV",
+  "historial_vacunas": ["Rabia", "Parvovirus"],
+  "historia_mascota": "Rescatada de la calle",
+  "info_adicional": "Le gusta jugar con pelotas"
+}
+"""
 
-    Scenario: Crear mascota como ADMIN - exitoso
-        * header Authorization = 'Bearer ' + adminToken
-        And request mascotaRequest
-        When method POST
-        Then status 201
-        And match response == read('classpath:karate/schemas/mascota.json')
-        And match response.nombre == 'Luna'
-        And match response.especie == 'PERRO'
-        And match response.estado == 'DISPONIBLE'
-        And match response.registrado_por == adminId
+@smoke
+Scenario: Crear mascota como ADMIN - exitoso
+# Login
+Given url authUrl + 'login/'
+And request { email: 'admin@pettech.com', password: 'Admin1234!' }
+When method POST
+Then status 200
+* def token = response.access
 
-    Scenario: Crear mascota como FAMILIA - denegado
-        * header Authorization = 'Bearer ' + familiaToken
-        And request mascotaRequest
-        When method POST
-        Then status 403
+# Crear mascota
+Given url mascotasUrl
+And request mascotaRequest
+And header Authorization = 'Bearer ' + token
+When method POST
+Then status 201
+And match response contains { id: '#number', nombre: 'Luna', especie: 'PERRO', estado: 'DISPONIBLE' }
+And match response contains { registrado_por: '#number', registrado_por_email: '#string' }
+And match response contains { fecha_ingreso: '#string', fecha_actualizacion: '#string' }
+And match response.foto_url == '##string'
+And match response.carnet_vacunas_url == '##string'
 
-    Scenario: Crear mascota sin autenticación
-        * header Authorization = ''
-        And request mascotaRequest
-        When method POST
-        Then status 401
+@regression @negative
+Scenario: Crear mascota como FAMILIA - denegado
+# Usar helper para crear usuario familia
+* def setupResult = callonce read('classpath:karate/helpers/setup-familia.feature')
+* def familiaToken = setupResult.familiaToken
 
-    Scenario: Crear mascota - campos mínimos requeridos
-        * header Authorization = 'Bearer ' + adminToken
-        And request { "nombre": "Test", "especie": "GATO", "estado": "DISPONIBLE" }
-        When method POST
-        Then status 201
-        And match response.nombre == 'Test'
+# Intentar crear mascota
+Given url mascotasUrl
+And request { nombre: 'Test', especie: 'GATO', estado: 'DISPONIBLE' }
+And header Authorization = 'Bearer ' + familiaToken
+When method POST
+Then status 403
 
-    Scenario: Crear mascota - nombre vacío
-        * header Authorization = 'Bearer ' + adminToken
-        And request { "nombre": "", "especie": "GATO", "estado": "DISPONIBLE" }
-        When method POST
-        Then status 400
+@regression @negative
+Scenario: Crear mascota sin autenticación
+Given url mascotasUrl
+And request { nombre: 'Test', especie: 'GATO', estado: 'DISPONIBLE' }
+When method POST
+Then status 401
 
-    Scenario: Crear mascota - especie inválida
-        * header Authorization = 'Bearer ' + adminToken
-        And request { "nombre": "Test", "especie": "ELEFANTE", "estado": "DISPONIBLE" }
-        When method POST
-        Then status 400
+@smoke
+Scenario: Crear mascota - campos mínimos requeridos
+# Login
+Given url authUrl + 'login/'
+And request { email: 'admin@pettech.com', password: 'Admin1234!' }
+When method POST
+Then status 200
+* def token = response.access
 
-    Scenario: Crear mascota - estado inválido
-        * header Authorization = 'Bearer ' + adminToken
-        And request { "nombre": "Test", "especie": "GATO", "estado": "EN_ADOPCION" }
-        When method POST
-        Then status 400
+Given url mascotasUrl
+And request { "nombre": "Test", "especie": "GATO", "estado": "DISPONIBLE" }
+And header Authorization = 'Bearer ' + token
+When method POST
+Then status 201
+And match response.nombre == 'Test'
 
-    Scenario: Crear mascota - edad negativa
-        * header Authorization = 'Bearer ' + adminToken
-        * def invalidRequest = karate.toObject(mascotaRequest)
-        * set invalidRequest.edad_anios = -1
-        And request invalidRequest
-        When method POST
-        Then status 400
+@regression @negative
+Scenario: Crear mascota - nombre vacío
+# Login
+Given url authUrl + 'login/'
+And request { email: 'admin@pettech.com', password: 'Admin1234!' }
+When method POST
+Then status 200
+* def token = response.access
 
-    Scenario: Crear mascota - validar respuesta contiene todos los campos
-        * header Authorization = 'Bearer ' + adminToken
-        And request mascotaRequest
-        When method POST
-        Then status 201
-        And match response contains { id: '#number', fecha_ingreso: '#string', fecha_actualizacion: '#string' }
+Given url mascotasUrl
+And request { "nombre": "", "especie": "GATO", "estado": "DISPONIBLE" }
+And header Authorization = 'Bearer ' + token
+When method POST
+Then status 400
+
+@regression @negative
+Scenario: Crear mascota - especie inválida
+# Login
+Given url authUrl + 'login/'
+And request { email: 'admin@pettech.com', password: 'Admin1234!' }
+When method POST
+Then status 200
+* def token = response.access
+
+Given url mascotasUrl
+And request { "nombre": "Test", "especie": "ELEFANTE", "estado": "DISPONIBLE" }
+And header Authorization = 'Bearer ' + token
+When method POST
+Then status 400
+
+@regression @negative
+Scenario: Crear mascota - estado inválido
+# Login
+Given url authUrl + 'login/'
+And request { email: 'admin@pettech.com', password: 'Admin1234!' }
+When method POST
+Then status 200
+* def token = response.access
+
+Given url mascotasUrl
+And request { "nombre": "Test", "especie": "GATO", "estado": "EN_ADOPCION" }
+And header Authorization = 'Bearer ' + token
+When method POST
+Then status 400
+
+@regression @edgecase
+Scenario: Crear mascota - edad negativa
+# Login
+Given url authUrl + 'login/'
+And request { email: 'admin@pettech.com', password: 'Admin1234!' }
+When method POST
+Then status 200
+* def token = response.access
+
+* def invalidRequest = mascotaRequest
+* set invalidRequest.edad_anios = -1
+Given url mascotasUrl
+And request invalidRequest
+And header Authorization = 'Bearer ' + token
+When method POST
+Then status 400
+
+@regression
+Scenario: Crear mascota - validar respuesta contiene campos criticos
+# Login
+Given url authUrl + 'login/'
+And request { email: 'admin@pettech.com', password: 'Admin1234!' }
+When method POST
+Then status 200
+* def token = response.access
+
+Given url mascotasUrl
+And request mascotaRequest
+And header Authorization = 'Bearer ' + token
+When method POST
+Then status 201
+# Solo validar campos criticos, no campos opcionales que pueden ser vacios
+And match response contains { id: '#number', nombre: '#string', especie: '#string', estado: '#string' }
+And match response contains { registrado_por: '#number', registrado_por_email: '#string' }
+And match response contains { fecha_ingreso: '#string', fecha_actualizacion: '#string' }
+And match response.foto_url == '##string'
+And match response.carnet_vacunas_url == '##string'

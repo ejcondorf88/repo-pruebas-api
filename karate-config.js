@@ -9,9 +9,9 @@ function fn() {
         
         // Credenciales de prueba
         adminEmail: 'admin@pettech.com',
-        adminPassword: 'Admin123!',
-        familiaEmail: 'familia@test.com',
-        familiaPassword: 'Familia123!'
+        adminPassword: 'Admin1234!',
+        familiaEmail: 'familiatest@pettech.com',
+        familiaPassword: 'Test1234!'
     };
     
     // URLs por entorno
@@ -32,12 +32,14 @@ function fn() {
     karate.configure('logPrettyRequest', true);
     karate.configure('logPrettyResponse', true);
     
-    // Autenticación automática con callSingle
-    var authResult = karate.callSingle('classpath:karate/helpers/auth.feature', config);
-    config.adminToken = authResult.adminToken;
-    config.adminId = authResult.adminId;
-    config.familiaToken = authResult.familiaToken;
-    config.familiaId = authResult.familiaId;
-    
-    return config;
+  // Autenticación automática con callSingle - solo ADMIN
+  var authResult = karate.callSingle('classpath:karate/helpers/auth.feature', config);
+  if (authResult && authResult.result) {
+    config.adminToken = authResult.result.adminToken;
+    config.adminId = authResult.result.adminId;
+  }
+  config.familiaToken = null;
+  config.familiaId = null;
+
+  return config;
 }
