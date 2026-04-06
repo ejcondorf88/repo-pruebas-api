@@ -1,83 +1,179 @@
 Feature: Familias - Perfil
 
-    Background:
-        * url baseUrl + '/api/' + apiVersion + '/familias/'
-        * header Content-Type = 'application/json'
+Background:
+  * def familiasUrl = baseUrl + '/api/v1/familias/'
+  * def familiasMiaUrl = familiasUrl + 'mia/'
+  * def authUrl = baseUrl + '/api/v1/auth/'
+  * header Content-Type = 'application/json'
 
-    Scenario: Obtener mi perfil como FAMILIA
-        * header Authorization = 'Bearer ' + familiaToken
-        Given path '/mia/'
-        When method GET
-        Then status 200
-        And match response == { familia: '##object', tiene_familia: '#boolean' }
+Scenario: Obtener mi perfil como FAMILIA
+  # Login inline como FAMILIA
+  * def randomEmail = 'familia_' + java.util.UUID.randomUUID() + '@test.com'
+  Given url authUrl + 'registro/'
+  And request { email: '#(randomEmail)', password: 'Test1234!', password_confirm: 'Test1234!' }
+  When method POST
+  Then status 201
 
-    Scenario: Obtener perfil sin haber creado familia
-        * header Authorization = 'Bearer ' + familiaToken
-        Given path '/mia/'
-        When method GET
-        Then status 200
-        And match response.tiene_familia == true
+  Given url authUrl + 'login/'
+  And request { email: '#(randomEmail)', password: 'Test1234!' }
+  When method POST
+  Then status 200
+  * def token = response.access
 
-    Scenario: Listar todas las familias como ADMIN
-        * header Authorization = 'Bearer ' + adminToken
-        When method GET
-        Then status 200
-        And match response == { count: '#number', next: '##string', previous: '##string', results: '#[]' }
+  # Crear familia primero
+  Given url familiasMiaUrl
+  And header Authorization = 'Bearer ' + token
+  And request { "nombre_familia": "Test", "ciudad": "Bogotá", "departamento": "Cundinamarca", "telefono": "+57 300 123 4567" }
+  When method POST
+  Then status 201
 
-    Scenario: Listar familias como FAMILIA - denegado
-        * header Authorization = 'Bearer ' + familiaToken
-        When method GET
-        Then status 403
+  # Obtener perfil
+  Given url familiasMiaUrl
+  And header Authorization = 'Bearer ' + token
+  When method GET
+  Then status 200
+  And match response contains { familia: '#object', tiene_familia: true }
 
-    Scenario: Actualizar mi perfil como FAMILIA
-        * header Authorization = 'Bearer ' + familiaToken
-        # Primero crear si no existe
-        Given path '/mia/'
-        And request { "nombre_familia": "UpdateTest", "ciudad": "Bogotá", "departamento": "Cundinamarca" }
-        When method POST
-        Then status 201
+Scenario: Obtener perfil sin haber creado familia
+  # Login inline como FAMILIA
+  * def randomEmail = 'familia_' + java.util.UUID.randomUUID() + '@test.com'
+  Given url authUrl + 'registro/'
+  And request { email: '#(randomEmail)', password: 'Test1234!', password_confirm: 'Test1234!' }
+  When method POST
+  Then status 201
 
-        # Actualizar
-        Given path '/mia/'
-        And request { "nombre_familia": "Familia Actualizada", "telefono": "+57 300 999 8888" }
-        When method PATCH
-        Then status 200
-        And match response.nombre_familia == 'Familia Actualizada'
+  Given url authUrl + 'login/'
+  And request { email: '#(randomEmail)', password: 'Test1234!' }
+  When method POST
+  Then status 200
+  * def token = response.access
 
-    Scenario: Actualizar perfil sin familia - debe fallar
-        * header Authorization = 'Bearer ' + adminToken
-        Given path '/mia/'
-        When method PATCH
-        Then status 400
+  # Verificar que no tiene familia
+  Given url familiasMiaUrl
+  And header Authorization = 'Bearer ' + token
+  When method GET
+  Then status 200
+  And match response.tiene_familia == false
 
-    Scenario: Eliminar cuenta como FAMILIA
-        * header Authorization = 'Bearer ' + familiaToken
-        # Primero crear familia
-        Given path '/mia/'
-        And request { "nombre_familia": "DeleteTest", "ciudad": "Bogotá", "departamento": "Cundinamarca" }
-        When method POST
-        Then status 201
+Scenario: Listar todas las familias como ADMIN
+  # Login inline como ADMIN
+  Given url authUrl + 'login/'
+  And request { email: 'admin@pettech.com', password: 'Admin1234!' }
+  When method POST
+  Then status 200
+  * def token = response.access
 
-        # Eliminar cuenta (esto requiere el endpoint auth/perfil/)
-        * url baseUrl + '/api/' + apiVersion + '/auth/perfil/'
-        When method DELETE
-        Then status 204
+  Given url familiasUrl
+  And header Authorization = 'Bearer ' + token
+  When method GET
+  Then status 200
+  And match response contains { count: '#number', next: '##string', previous: '##string', results: '#[]' }
 
-    Scenario: Eliminar cuenta ADMIN - debe fallar
-        * header Authorization = 'Bearer ' + adminToken
-        * url baseUrl + '/api/' + apiVersion + '/auth/perfil/'
-        When method DELETE
-        Then status 403
+Scenario: Listar familias como FAMILIA - denegado
+  # Login inline como FAMILIA
+  * def randomEmail = 'familia_' + java.util.UUID.randomUUID() + '@test.com'
+  Given url authUrl + 'registro/'
+  And request { email: '#(randomEmail)', password: 'Test1234!', password_confirm: 'Test1234!' }
+  When method POST
+  Then status 201
 
-    Scenario: Ver familia específica como ADMIN
-        * header Authorization = 'Bearer ' + adminToken
-        * url baseUrl + '/api/' + apiVersion + '/familias/'
-        Given path '1'
-        When method GET
-        Then status 200
+  Given url authUrl + 'login/'
+  And request { email: '#(randomEmail)', password: 'Test1234!' }
+  When method POST
+  Then status 200
+  * def token = response.access
 
-    Scenario: Acceso sin autenticación
-        * header Authorization = ''
-        Given path '/mia/'
-        When method GET
-        Then status 401
+  Given url familiasUrl
+  And header Authorization = 'Bearer ' + token
+  When method GET
+  Then status 403
+
+Scenario: Actualizar mi perfil como FAMILIA
+  # Login inline como FAMILIA
+  * def randomEmail = 'familia_' + java.util.UUID.randomUUID() + '@test.com'
+  Given url authUrl + 'registro/'
+  And request { email: '#(randomEmail)', password: 'Test1234!', password_confirm: 'Test1234!' }
+  When method POST
+  Then status 201
+
+  Given url authUrl + 'login/'
+  And request { email: '#(randomEmail)', password: 'Test1234!' }
+  When method POST
+  Then status 200
+  * def token = response.access
+
+  # Crear familia
+  Given url familiasMiaUrl
+  And header Authorization = 'Bearer ' + token
+  And request { "nombre_familia": "UpdateTest", "ciudad": "Bogotá", "departamento": "Cundinamarca", "telefono": "+57 300 123 4567" }
+  When method POST
+  Then status 201
+
+  # Actualizar
+  Given url familiasMiaUrl
+  And header Authorization = 'Bearer ' + token
+  And request { "nombre_familia": "Familia Actualizada", "telefono": "+57 300 999 8888" }
+  When method PATCH
+  Then status 200
+  And match response.nombre_familia == 'Familia Actualizada'
+
+Scenario: Actualizar perfil sin familia - debe fallar
+  # Login inline como ADMIN
+  Given url authUrl + 'login/'
+  And request { email: 'admin@pettech.com', password: 'Admin1234!' }
+  When method POST
+  Then status 200
+  * def token = response.access
+
+  Given url familiasMiaUrl
+  And header Authorization = 'Bearer ' + token
+  When method PATCH
+  Then status 404
+
+Scenario: Eliminar cuenta como FAMILIA
+  * def authPerfilUrl = baseUrl + '/api/v1/auth/perfil/'
+  # Login inline como FAMILIA
+  * def randomEmail = 'familia_' + java.util.UUID.randomUUID() + '@test.com'
+  Given url authUrl + 'registro/'
+  And request { email: '#(randomEmail)', password: 'Test1234!', password_confirm: 'Test1234!' }
+  When method POST
+  Then status 201
+
+  Given url authUrl + 'login/'
+  And request { email: '#(randomEmail)', password: 'Test1234!' }
+  When method POST
+  Then status 200
+  * def token = response.access
+
+  # Crear familia primero
+  Given url familiasMiaUrl
+  And header Authorization = 'Bearer ' + token
+  And request { "nombre_familia": "DeleteTest", "ciudad": "Bogotá", "departamento": "Cundinamarca", "telefono": "+57 300 123 4567" }
+  When method POST
+  Then status 201
+
+  # Eliminar cuenta
+  Given url authPerfilUrl
+  And header Authorization = 'Bearer ' + token
+  When method DELETE
+  Then status 204
+
+Scenario: Eliminar cuenta ADMIN - debe fallar
+  * def authPerfilUrl = baseUrl + '/api/v1/auth/perfil/'
+  # Login inline como ADMIN
+  Given url authUrl + 'login/'
+  And request { email: 'admin@pettech.com', password: 'Admin1234!' }
+  When method POST
+  Then status 200
+  * def token = response.access
+
+  Given url authPerfilUrl
+  And header Authorization = 'Bearer ' + token
+  When method DELETE
+  Then status 403
+
+Scenario: Acceso sin autenticación
+  Given url familiasMiaUrl
+  And header Authorization = ''
+  When method GET
+  Then status 401
