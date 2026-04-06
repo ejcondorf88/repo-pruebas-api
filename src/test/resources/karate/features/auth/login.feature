@@ -1,51 +1,51 @@
 Feature: Auth - Login
 
-    Background:
-        * def authUrl = baseUrl + '/api/v1/auth/'
-        * header Content-Type = 'application/json'
+Background:
+* def authUrl = baseUrl + '/api/v1/auth/'
+* header Content-Type = 'application/json'
 
-    @smoke @regression
-    Scenario: Login exitoso como ADMIN
-        Given url authUrl + 'login/'
-        And request { email: 'admin@pettech.com', password: 'Admin1234!' }
-        When method POST
-        Then status 200
-        And match response == { access: '#string', refresh: '#string', email: 'admin@pettech.com', rol: 'ADMIN', perfil_completo: '#boolean', nombre: '#string', id: '#number' }
-        And match response.access == '#string'
-        And match response.refresh == '#string'
+@smoke
+Scenario: Login exitoso como ADMIN
+Given url authUrl + 'login/'
+And request { email: 'admin@pettech.com', password: 'Admin1234!' }
+When method POST
+Then status 200
+And match response == { access: '#string', refresh: '#string', email: 'admin@pettech.com', rol: 'ADMIN', perfil_completo: '#boolean', nombre: '#string', id: '#number' }
+And match response.access == '#string'
+And match response.refresh == '#string'
 
-    @regression
-    Scenario: Login fallido - usuario inexistente
-        Given url authUrl + 'login/'
-        And request { email: 'noexiste@test.com', password: 'Password123!' }
-        When method POST
-        Then status 404
-        And match response.error contains 'no se encuentra registrado'
+@regression @negative
+Scenario: Login fallido - usuario inexistente
+Given url authUrl + 'login/'
+And request { email: 'noexiste@test.com', password: 'Password123!' }
+When method POST
+Then status 404
+And match response.error contains 'no se encuentra registrado'
 
-    @regression
-    Scenario: Login fallido - contraseña incorrecta
-        Given url authUrl + 'login/'
-        And request { email: 'admin@pettech.com', password: 'WrongPassword123!' }
-        When method POST
-        Then status 401
+@regression @negative
+Scenario: Login fallido - contraseña incorrecta
+Given url authUrl + 'login/'
+And request { email: 'admin@pettech.com', password: 'WrongPassword123!' }
+When method POST
+Then status 401
 
-    @regression
-    Scenario: Login fallido - email mal formado
-        Given url authUrl + 'login/'
-    And request { email: 'no-es-email', password: 'Password123!' }
-    When method POST
-    Then status 404
-    # Backend retorna 404 si no encuentra usuario (incluye email mal formado)
+@regression @negative
+Scenario: Login fallido - email mal formado
+Given url authUrl + 'login/'
+And request { email: 'no-es-email', password: 'Password123!' }
+When method POST
+Then status 404
+# Backend retorna 404 si no encuentra usuario (incluye email mal formado)
 
-    @regression
-    Scenario: Login fallido - campos vacíos
-        Given url authUrl + 'login/'
-        And request { email: '', password: '' }
-        When method POST
-        Then status 404
-        # Backend retorna 404 para campos vacíos (no encuentra usuario)
+@regression @negative
+Scenario: Login fallido - campos vacíos
+Given url authUrl + 'login/'
+And request { email: '', password: '' }
+When method POST
+Then status 404
+# Backend retorna 404 para campos vacíos (no encuentra usuario)
 
-    @smoke
+@smoke
 Scenario: Login - validar estructura de tokens JWT
 Given url authUrl + 'login/'
 And request { email: 'admin@pettech.com', password: 'Admin1234!' }

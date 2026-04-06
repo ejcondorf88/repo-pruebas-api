@@ -8,9 +8,4 @@ public class RunCucumberTest {
     Karate testAll() {
         return Karate.run().relativeTo(getClass());
     }
-
-    @Karate.Test
-    Karate testUsers() {
-        return Karate.run("features/users").relativeTo(getClass());
-    }
 }

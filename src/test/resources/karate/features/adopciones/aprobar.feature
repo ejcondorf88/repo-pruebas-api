@@ -18,6 +18,7 @@ Background:
 }
 """
 
+@smoke
 Scenario: Aprobar solicitud como ADMIN - exitoso
 # Crear usuario FAMILIA
 * def randomEmail = 'familia_' + java.util.UUID.randomUUID() + '@test.com'
@@ -32,29 +33,29 @@ When method POST
 Then status 200
 * def familiaToken = response.access
 
-  * def familiaRequest = familiaBaseRequest
-  * set familiaRequest.nombre_familia = 'Aprobar'
-  Given url familiasMiaUrl
-  And header Authorization = 'Bearer ' + familiaToken
-  And request familiaRequest
-  When method POST
-  Then status 201
+* def familiaRequest = familiaBaseRequest
+* set familiaRequest.nombre_familia = 'Aprobar'
+Given url familiasMiaUrl
+And header Authorization = 'Bearer ' + familiaToken
+And request familiaRequest
+When method POST
+Then status 201
 
-  # Crear mascota como ADMIN
-  Given url authUrl + 'login/'
-  And request { email: 'admin@pettech.com', password: 'Admin1234!' }
-  When method POST
-  Then status 200
-  * def adminToken = response.access
+# Crear mascota como ADMIN
+Given url authUrl + 'login/'
+And request { email: 'admin@pettech.com', password: 'Admin1234!' }
+When method POST
+Then status 200
+* def adminToken = response.access
 
-  Given url baseUrl + '/api/v1/mascotas/'
-  And header Authorization = 'Bearer ' + adminToken
-  And request { nombre: 'Mascota Test', especie: 'PERRO', estado: 'DISPONIBLE' }
-  When method POST
-  Then status 201
-  * def mascotaIdInt = response.id
+Given url baseUrl + '/api/v1/mascotas/'
+And header Authorization = 'Bearer ' + adminToken
+And request { nombre: 'Mascota Test', especie: 'PERRO', estado: 'DISPONIBLE' }
+When method POST
+Then status 201
+* def mascotaIdInt = response.id
 
-  * def solicitudRequest = { "mascota": "#(mascotaIdInt)", "mensaje": "Aprobar esta solicitud" }
+* def solicitudRequest = { "mascota": "#(mascotaIdInt)", "mensaje": "Aprobar esta solicitud" }
 Given url solicitudesUrl
 And header Authorization = 'Bearer ' + familiaToken
 And request solicitudRequest
@@ -77,6 +78,23 @@ Then status 200
 And match response.estado == 'APROBADA'
 And match response.notas_admin == "Excelente familia, apruebo la solicitud."
 
+@smoke
+Scenario: Listar solicitudes pendientes como ADMIN
+# Login como ADMIN
+Given url authUrl + 'login/'
+And request { email: 'admin@pettech.com', password: 'Admin1234!' }
+When method POST
+Then status 200
+* def adminToken = response.access
+
+Given url solicitudesUrl
+And header Authorization = 'Bearer ' + adminToken
+And param estado = 'PENDIENTE'
+When method GET
+Then status 200
+And match response == { count: '#number', next: '##string', previous: '##string', results: '#[]' }
+
+@regression @negative
 Scenario: Aprobar solicitud como FAMILIA - debe fallar
 # Crear usuario FAMILIA
 * def randomEmail = 'familia_' + java.util.UUID.randomUUID() + '@test.com'
@@ -97,22 +115,24 @@ And request { "notas_admin": "Intento de aprobación" }
 When method POST
 Then status 403
 
+@regression @negative @edgecase
 Scenario: Aprobar solicitud ya decidida - debe fallar
-  # Login como ADMIN
-  Given url authUrl + 'login/'
-  And request { email: 'admin@pettech.com', password: 'Admin1234!' }
-  When method POST
-  Then status 200
-  * def adminToken = response.access
+# Login como ADMIN
+Given url authUrl + 'login/'
+And request { email: 'admin@pettech.com', password: 'Admin1234!' }
+When method POST
+Then status 200
+* def adminToken = response.access
 
-  # Si la solicitud 1 ya existe y fue decidida -> 409 (conflicto)
-  # Si no existe -> 404
-  Given url solicitudesUrl + '1/aprobar/'
-  And header Authorization = 'Bearer ' + adminToken
-  And request { "notas_admin": "Segunda aprobación" }
-  When method POST
-  Then assert responseStatus == 400 || responseStatus == 404 || responseStatus == 409
+# Si la solicitud 1 ya existe y fue decidida -> 409 (conflicto)
+# Si no existe -> 404
+Given url solicitudesUrl + '1/aprobar/'
+And header Authorization = 'Bearer ' + adminToken
+And request { "notas_admin": "Segunda aprobación" }
+When method POST
+Then assert responseStatus == 400 || responseStatus == 404 || responseStatus == 409
 
+@regression
 Scenario: Rechazar solicitud como ADMIN
 # Crear usuario FAMILIA
 * def randomEmail = 'familia_' + java.util.UUID.randomUUID() + '@test.com'
@@ -127,29 +147,29 @@ When method POST
 Then status 200
 * def familiaToken = response.access
 
-  * def familiaRequest = familiaBaseRequest
-  * set familiaRequest.nombre_familia = 'Rechazar'
-  Given url familiasMiaUrl
-  And header Authorization = 'Bearer ' + familiaToken
-  And request familiaRequest
-  When method POST
-  Then status 201
+* def familiaRequest = familiaBaseRequest
+* set familiaRequest.nombre_familia = 'Rechazar'
+Given url familiasMiaUrl
+And header Authorization = 'Bearer ' + familiaToken
+And request familiaRequest
+When method POST
+Then status 201
 
-  # Crear mascota como ADMIN
-  Given url authUrl + 'login/'
-  And request { email: 'admin@pettech.com', password: 'Admin1234!' }
-  When method POST
-  Then status 200
-  * def adminToken = response.access
+# Crear mascota como ADMIN
+Given url authUrl + 'login/'
+And request { email: 'admin@pettech.com', password: 'Admin1234!' }
+When method POST
+Then status 200
+* def adminToken = response.access
 
-  Given url baseUrl + '/api/v1/mascotas/'
-  And header Authorization = 'Bearer ' + adminToken
-  And request { nombre: 'Mascota Test', especie: 'PERRO', estado: 'DISPONIBLE' }
-  When method POST
-  Then status 201
-  * def mascotaIdInt = response.id
+Given url baseUrl + '/api/v1/mascotas/'
+And header Authorization = 'Bearer ' + adminToken
+And request { nombre: 'Mascota Test', especie: 'PERRO', estado: 'DISPONIBLE' }
+When method POST
+Then status 201
+* def mascotaIdInt = response.id
 
-  * def solicitudRequest = { "mascota": "#(mascotaIdInt)", "mensaje": "Rechazar esta" }
+* def solicitudRequest = { "mascota": "#(mascotaIdInt)", "mensaje": "Rechazar esta" }
 Given url solicitudesUrl
 And header Authorization = 'Bearer ' + familiaToken
 And request solicitudRequest
@@ -171,6 +191,7 @@ When method POST
 Then status 200
 And match response.estado == 'RECHAZADA'
 
+@regression @negative
 Scenario: Rechazar solicitud como FAMILIA - debe fallar
 # Crear usuario FAMILIA
 * def randomEmail = 'familia_' + java.util.UUID.randomUUID() + '@test.com'
@@ -191,6 +212,7 @@ And request { "notas_admin": "Intento de rechazo" }
 When method POST
 Then status 403
 
+@regression
 Scenario: Flujo completo: crear -> aprobar -> completar adopción
 # Crear usuario FAMILIA
 * def randomEmail = 'familia_' + java.util.UUID.randomUUID() + '@test.com'
@@ -205,30 +227,30 @@ When method POST
 Then status 200
 * def familiaToken = response.access
 
-  * def familiaRequest = familiaBaseRequest
-  * set familiaRequest.nombre_familia = 'Flujo'
-  Given url familiasMiaUrl
-  And header Authorization = 'Bearer ' + familiaToken
-  And request familiaRequest
-  When method POST
-  Then status 201
+* def familiaRequest = familiaBaseRequest
+* set familiaRequest.nombre_familia = 'Flujo'
+Given url familiasMiaUrl
+And header Authorization = 'Bearer ' + familiaToken
+And request familiaRequest
+When method POST
+Then status 201
 
-  # Crear mascota como ADMIN
-  Given url authUrl + 'login/'
-  And request { email: 'admin@pettech.com', password: 'Admin1234!' }
-  When method POST
-  Then status 200
-  * def adminToken = response.access
+# Crear mascota como ADMIN
+Given url authUrl + 'login/'
+And request { email: 'admin@pettech.com', password: 'Admin1234!' }
+When method POST
+Then status 200
+* def adminToken = response.access
 
-  Given url baseUrl + '/api/v1/mascotas/'
-  And header Authorization = 'Bearer ' + adminToken
-  And request { nombre: 'Mascota Test', especie: 'PERRO', estado: 'DISPONIBLE' }
-  When method POST
-  Then status 201
-  * def mascotaIdInt = response.id
+Given url baseUrl + '/api/v1/mascotas/'
+And header Authorization = 'Bearer ' + adminToken
+And request { nombre: 'Mascota Test', especie: 'PERRO', estado: 'DISPONIBLE' }
+When method POST
+Then status 201
+* def mascotaIdInt = response.id
 
-  # Crear solicitud con mascotaId dinámico
-  * def solicitudRequest = { "mascota": "#(mascotaIdInt)", "mensaje": "Flujo completo" }
+# Crear solicitud con mascotaId dinámico
+* def solicitudRequest = { "mascota": "#(mascotaIdInt)", "mensaje": "Flujo completo" }
 Given url solicitudesUrl
 And header Authorization = 'Bearer ' + familiaToken
 And request solicitudRequest
@@ -257,6 +279,7 @@ And header Authorization = 'Bearer ' + adminToken
 When method GET
 Then status 200
 
+@regression @negative @edgecase
 Scenario: Aprobar solicitud inexistente - 404
 # Login como ADMIN
 Given url authUrl + 'login/'
@@ -271,19 +294,20 @@ And request { "notas_admin": "Test" }
 When method POST
 Then status 404
 
+@regression @negative @edgecase
 Scenario: Aprobar sin notas admin
-  # Login como ADMIN
-  Given url authUrl + 'login/'
-  And request { email: 'admin@pettech.com', password: 'Admin1234!' }
-  When method POST
-  Then status 200
-  * def adminToken = response.access
+# Login como ADMIN
+Given url authUrl + 'login/'
+And request { email: 'admin@pettech.com', password: 'Admin1234!' }
+When method POST
+Then status 200
+* def adminToken = response.access
 
-  # Si la solicitud no existe -> 404
-  # Si la solicitud ya existe y fue decidida -> 409
-  # Si existe y está pendiente sin notas -> 400
-  Given url solicitudesUrl + '1/aprobar/'
-  And header Authorization = 'Bearer ' + adminToken
-  And request {}
-  When method POST
-  Then assert responseStatus == 400 || responseStatus == 404 || responseStatus == 409
+# Si la solicitud no existe -> 404
+# Si la solicitud ya existe y fue decidida -> 409
+# Si existe y está pendiente sin notas -> 400
+Given url solicitudesUrl + '1/aprobar/'
+And header Authorization = 'Bearer ' + adminToken
+And request {}
+When method POST
+Then assert responseStatus == 400 || responseStatus == 404 || responseStatus == 409
