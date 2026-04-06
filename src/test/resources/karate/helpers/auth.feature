@@ -1,22 +1,12 @@
-Feature: Authentication Helper
+Feature: Auth Helper
 
     Background:
-        * url baseUrl + '/api/' + apiVersion + '/auth'
+        * def authUrl = baseUrl + '/api/v1/auth/'
 
-    @ignore
-    Scenario: Authenticate as ADMIN
-        Given path '/login/'
-        And request { email: adminEmail, password: adminPassword }
-        When method POST
-        Then status 200
-        * def adminToken = response.access
-        * def adminId = response.id
-
-    @ignore
-    Scenario: Authenticate as FAMILIA
-        Given path '/login/'
-        And request { email: familiaEmail, password: familiaPassword }
-        When method POST
-        Then status 200
-        * def familiaToken = response.access
-        * def familiaId = response.id
+ @ignore
+  Scenario: Login as ADMIN
+    Given url authUrl + 'login/'
+    And request { email: 'admin@pettech.com', password: 'Admin1234!' }
+    When method POST
+    Then status 200
+    * def result = { adminToken: response.access, adminId: response.id, adminRefresh: response.refresh }
