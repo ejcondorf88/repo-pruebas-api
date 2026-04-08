@@ -2,6 +2,23 @@
 
 Proyecto completo de pruebas de API para el sistema de adopción de mascotas PetTech.
 
+## 📋 Contenido
+
+- [Requisitos](#requisitos)
+- [Tecnologías](#tecnologías)
+- [Arquitectura SDD](#arquitectura-sdd)
+- [Credenciales de Prueba](#credenciales-de-prueba)
+- [Estructura del Proyecto](#estructura-del-proyecto)
+- [Comandos](#comandos)
+- [Tags de Ejecución](#tags-de-ejecución)
+- [Recursos de la API](#recursos-de-la-api)
+- [Casos Edge Cubiertos](#casos-edge-cubiertos)
+- [Flujos de Prueba](#flujos-de-prueba)
+- [Solución de Problemas](#solución-de-problemas)
+- [Reportes](#reportes)
+- [Plugins Utilizados](#plugins-utilizados)
+- [Contribución](#contribución)
+
 ## Requisitos
 
 - Java 11 o superior
@@ -13,6 +30,81 @@ Proyecto completo de pruebas de API para el sistema de adopción de mascotas Pet
 - **Backend**: Django 5.0.6 + Django REST Framework 3.15.2
 - **Autenticación**: JWT (djangorestframework-simplejwt 5.3.1)
 - **Testing**: Karate Framework 1.4.1 + JUnit 5
+- **Gestión de Memoria**: Engram (sistema de memoria persistente)
+- **Agentes IA**: OpenCode (orquestador SDD)
+
+## Arquitectura SDD
+
+Este proyecto sigue el enfoque **SDD (Spec-Driven Development)** mediante OpenCode Agents:
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│  FASES SDD                                                  │
+├─────────────────────────────────────────────────────────────┤
+│  @sdd-explorar    → Investigación de API y comportamientos  │
+│  @sdd-especificar → Definición de escenarios y criterios    │
+│  @sdd-disenar     → Decisiones de diseño técnico          │
+│  @sdd-implementar → Implementación de tests               │
+│  @sdd-verificar   → Depuración y verificación               │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Flujo de Trabajo con OpenCode
+
+1. **Exploración**: Agentes investigan el backend, documentan endpoints y comportamientos
+2. **Especificación**: Se definen escenarios Gherkin con criterios de aceptación
+3. **Diseño**: Se toman decisiones técnicas (patrones, estructura, helpers)
+4. **Implementación**: Se escriben los tests Karate siguiendo patrones establecidos
+5. **Verificación**: Se ejecutan tests, se documentan fallos y soluciones
+
+### Sistema de Memoria Engram
+
+Las enseñanzas y patrones se almacenan en **Engram** para futuras sesiones:
+
+```bash
+# Buscar patrones de implementación
+mem_search(query: "@sdd-implementar @patrones", project: "repo-pruebas-api")
+
+# Buscar comportamientos del backend
+mem_search(query: "@sdd-explorar @django", project: "repo-pruebas-api")
+
+# Buscar soluciones a errores comunes
+mem_search(query: "@sdd-verificar @errores-comunes", project: "repo-pruebas-api")
+```
+
+**Tags documentados en Engram:**
+- `@sdd-explorar` - Descubrimientos del backend
+- `@sdd-especificar` - Especificaciones y escenarios
+- `@sdd-disenar` - Patrones de diseño
+- `@sdd-implementar` - Código y patrones
+- `@sdd-verificar` - Debugging y soluciones
+
+## Credenciales de Prueba
+
+### Usuario Administrador (ADMIN)
+```
+Email: admin@pettech.com
+Password: Admin1234!
+Rol: ADMIN
+```
+
+### Usuario Familia (FAMILIA)
+```
+# Se crea dinámicamente en cada escenario
+Email: familia_<uuid>@test.com
+Password: Test1234!
+Rol: FAMILIA
+```
+
+### Configuración en karate-config.js
+```javascript
+var config = {
+  baseUrl: 'http://localhost:8000',
+  adminEmail: 'admin@pettech.com',
+  adminPassword: 'Admin1234!',
+  // Tokens se obtienen dinámicamente en cada escenario
+};
+```
 
 ## Estructura del Proyecto
 
@@ -79,7 +171,7 @@ familiaPassword: 'Familia123!'
 
 ```bash
 # Ejecutar todas las pruebas
-mvn test
+mvn clean verify
 
 # Ejecutar con entorno específico
 mvn test -Dkarate.env=dev
@@ -94,9 +186,49 @@ mvn test -Dkarate.options="classpath:karate/features/auth"
 
 # Ejecutar con tags
 mvn test -Dkarate.options="--tags @smoke"
+mvn test -Dkarate.options="--tags @regression"
+mvn test -Dkarate.options="--tags @negative"
+mvn test -Dkarate.options="--tags @edgecase"
 
 # Generar reporte
 mvn test -Dkarate.options="--format html"
+mvn serenity:aggregate
+```
+
+## Tags de Ejecución
+
+Los escenarios están organizados con tags para ejecución selectiva:
+
+### Tags Principales
+
+| Tag | Descripción | Escenarios |
+|-----|-------------|------------|
+| `@smoke` | Pruebas críticas/happy path | 32 |
+| `@regression` | Pruebas exhaustivas de regresión | 80 |
+| `@negative` | Casos negativos (errores, denegados) | 50 |
+| `@edgecase` | Casos límite y extremos | 19 |
+
+### Uso de Tags
+
+```bash
+# Ejecutar solo smoke tests (rápido)
+mvn clean verify -Dkarate.options="--tags @smoke"
+# Resultado: 32 tests
+
+# Ejecutar pruebas de regresión completas
+mvn clean verify -Dkarate.options="--tags @regression"
+# Resultado: 80 tests
+
+# Ejecutar casos negativos
+mvn clean verify -Dkarate.options="--tags @negative"
+# Resultado: 50 tests
+
+# Ejecutar edge cases
+mvn clean verify -Dkarate.options="--tags @edgecase"
+# Resultado: 19 tests
+
+# Combinar tags
+mvn clean verify -Dkarate.options="--tags @smoke or @negative"
 ```
 
 ## Recursos de la API
@@ -271,6 +403,83 @@ Para agregar nuevos tests:
 3. Usar `Background` para configuración común
 4. Seguir el patrón Given/When/Then
 5. Validar respuestas con schemas JSON
+6. **Documentar en Engram**: Guardar patrones y aprendizajes usando `mem_save`
+
+## Plugins Utilizados
+
+### Maven Plugins
+
+| Plugin | Versión | Propósito |
+|--------|---------|-----------|
+| `maven-surefire-plugin` | 3.1.2 | Ejecución de tests |
+| `karate-maven-plugin` | 1.4.1 | Integración Karate con Maven |
+
+### Frameworks y Librerías
+
+| Librería | Versión | Uso |
+|----------|---------|-----|
+| `karate-core` | 1.4.1 | Framework de pruebas API |
+| `karate-junit5` | 1.4.1 | Integración con JUnit 5 |
+| `cucumber-java` | 7.x | Soporte Gherkin |
+| `serenity-core` | 4.x | Reportes (opcional) |
+
+### Herramientas de Desarrollo
+
+| Herramienta | Versión | Descripción |
+|-------------|---------|-------------|
+| **OpenCode** | Latest | Orquestador de Agentes SDD |
+| **Engram** | Latest | Sistema de memoria persistente |
+| **Karate IntelliJ Plugin** | Latest | Soporte IDE (syntax highlighting) |
+
+### Instalación de Plugins IDE (VS Code / IntelliJ)
+
+**VS Code:**
+```json
+// extensions.json
+{
+  "recommendations": [
+    "karateide.karate-ide",
+    "cucumberopen.cucumber-official",
+    "redhat.vscode-xml"
+  ]
+}
+```
+
+**IntelliJ IDEA:**
+- Cucumber for Java (JetBrains)
+- Gherkin (JetBrains)
+- Karate Plugin (Community)
+
+### Configuración OpenCode
+
+Este proyecto utiliza OpenCode Agents para SDD:
+
+```yaml
+# .opencode/config.yaml (opcional)
+agents:
+  - sdd-explore
+  - sdd-spec
+  - sdd-design
+  - sdd-apply
+  - sdd-verify
+
+memory:
+  backend: engram
+  project: repo-pruebas-api
+```
+
+### Comandos de Memoria (Engram)
+
+```bash
+# Guardar observación
+mem_save(title: "Nuevo Patrón", type: "pattern", content: "...")
+
+# Buscar en memoria
+mem_search(query: "@sdd-implementar patrones", project: "repo-pruebas-api")
+
+# Ver contexto del proyecto
+mem_context(project: "repo-pruebas-api")
+```
 
 ## Licencia
 
